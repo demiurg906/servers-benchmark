@@ -1,3 +1,12 @@
+buildscript {
+    ext.ktor_version = '1.0.0'
+}
+
+repositories {
+    jcenter()
+}
+
 dependencies {
     compile(project(":common"))
+    compile "io.ktor:ktor-network:$ktor_version"
 }

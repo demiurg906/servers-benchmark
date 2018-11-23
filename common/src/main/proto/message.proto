@@ -6,10 +6,10 @@ option optimize_for = LITE_RUNTIME;
 message Message {
     required int32 n = 1;
     repeated int32 array = 2;
-    optional Metrics metrics = 3;
+    optional bool hasNextRequest = 3;
 }
 
 message Metrics {
-    required int32 sortingTime = 1;
-    required int32 requestTime = 2;
+    required int64 sortingTime = 1;
+    required int64 requestTime = 2;
 }

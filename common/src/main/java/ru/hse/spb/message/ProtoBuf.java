@@ -35,13 +35,13 @@ public final class ProtoBuf {
     int getArray(int index);
 
     /**
-     * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
+     * <code>optional bool hasNextRequest = 3;</code>
      */
-    boolean hasMetrics();
+    boolean hasHasNextRequest();
     /**
-     * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
+     * <code>optional bool hasNextRequest = 3;</code>
      */
-    ru.hse.spb.message.ProtoBuf.Metrics getMetrics();
+    boolean getHasNextRequest();
   }
   /**
    * Protobuf type {@code ru.hse.spb.message.Message}
@@ -119,17 +119,9 @@ public final class ProtoBuf {
               input.popLimit(limit);
               break;
             }
-            case 26: {
-              ru.hse.spb.message.ProtoBuf.Metrics.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000002) == 0x00000002)) {
-                subBuilder = metrics_.toBuilder();
-              }
-              metrics_ = input.readMessage(ru.hse.spb.message.ProtoBuf.Metrics.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(metrics_);
-                metrics_ = subBuilder.buildPartial();
-              }
+            case 24: {
               bitField0_ |= 0x00000002;
+              hasNextRequest_ = input.readBool();
               break;
             }
           }
@@ -206,25 +198,25 @@ public final class ProtoBuf {
       return array_.get(index);
     }
 
-    public static final int METRICS_FIELD_NUMBER = 3;
-    private ru.hse.spb.message.ProtoBuf.Metrics metrics_;
+    public static final int HASNEXTREQUEST_FIELD_NUMBER = 3;
+    private boolean hasNextRequest_;
     /**
-     * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
+     * <code>optional bool hasNextRequest = 3;</code>
      */
-    public boolean hasMetrics() {
+    public boolean hasHasNextRequest() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
+     * <code>optional bool hasNextRequest = 3;</code>
      */
-    public ru.hse.spb.message.ProtoBuf.Metrics getMetrics() {
-      return metrics_;
+    public boolean getHasNextRequest() {
+      return hasNextRequest_;
     }
 
     private void initFields() {
       n_ = 0;
       array_ = java.util.Collections.emptyList();
-      metrics_ = ru.hse.spb.message.ProtoBuf.Metrics.getDefaultInstance();
+      hasNextRequest_ = false;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -235,12 +227,6 @@ public final class ProtoBuf {
       if (!hasN()) {
         memoizedIsInitialized = 0;
         return false;
-      }
-      if (hasMetrics()) {
-        if (!getMetrics().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
       }
       memoizedIsInitialized = 1;
       return true;
@@ -256,7 +242,7 @@ public final class ProtoBuf {
         output.writeInt32(2, array_.get(i));
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeMessage(3, metrics_);
+        output.writeBool(3, hasNextRequest_);
       }
       output.writeRawBytes(unknownFields);
     }
@@ -282,7 +268,7 @@ public final class ProtoBuf {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, metrics_);
+          .computeBoolSize(3, hasNextRequest_);
       }
       size += unknownFields.size();
       memoizedSerializedSize = size;
@@ -382,7 +368,7 @@ public final class ProtoBuf {
         bitField0_ = (bitField0_ & ~0x00000001);
         array_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
-        metrics_ = ru.hse.spb.message.ProtoBuf.Metrics.getDefaultInstance();
+        hasNextRequest_ = false;
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
@@ -419,7 +405,7 @@ public final class ProtoBuf {
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.metrics_ = metrics_;
+        result.hasNextRequest_ = hasNextRequest_;
         result.bitField0_ = to_bitField0_;
         return result;
       }
@@ -439,8 +425,8 @@ public final class ProtoBuf {
           }
           
         }
-        if (other.hasMetrics()) {
-          mergeMetrics(other.getMetrics());
+        if (other.hasHasNextRequest()) {
+          setHasNextRequest(other.getHasNextRequest());
         }
         setUnknownFields(
             getUnknownFields().concat(other.unknownFields));
@@ -451,12 +437,6 @@ public final class ProtoBuf {
         if (!hasN()) {
           
           return false;
-        }
-        if (hasMetrics()) {
-          if (!getMetrics().isInitialized()) {
-            
-            return false;
-          }
         }
         return true;
       }
@@ -578,63 +558,35 @@ public final class ProtoBuf {
         return this;
       }
 
-      private ru.hse.spb.message.ProtoBuf.Metrics metrics_ = ru.hse.spb.message.ProtoBuf.Metrics.getDefaultInstance();
+      private boolean hasNextRequest_ ;
       /**
-       * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
+       * <code>optional bool hasNextRequest = 3;</code>
        */
-      public boolean hasMetrics() {
+      public boolean hasHasNextRequest() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
+       * <code>optional bool hasNextRequest = 3;</code>
        */
-      public ru.hse.spb.message.ProtoBuf.Metrics getMetrics() {
-        return metrics_;
+      public boolean getHasNextRequest() {
+        return hasNextRequest_;
       }
       /**
-       * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
+       * <code>optional bool hasNextRequest = 3;</code>
        */
-      public Builder setMetrics(ru.hse.spb.message.ProtoBuf.Metrics value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        metrics_ = value;
-
+      public Builder setHasNextRequest(boolean value) {
         bitField0_ |= 0x00000004;
+        hasNextRequest_ = value;
+        
         return this;
       }
       /**
-       * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
+       * <code>optional bool hasNextRequest = 3;</code>
        */
-      public Builder setMetrics(
-          ru.hse.spb.message.ProtoBuf.Metrics.Builder builderForValue) {
-        metrics_ = builderForValue.build();
-
-        bitField0_ |= 0x00000004;
-        return this;
-      }
-      /**
-       * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
-       */
-      public Builder mergeMetrics(ru.hse.spb.message.ProtoBuf.Metrics value) {
-        if (((bitField0_ & 0x00000004) == 0x00000004) &&
-            metrics_ != ru.hse.spb.message.ProtoBuf.Metrics.getDefaultInstance()) {
-          metrics_ =
-            ru.hse.spb.message.ProtoBuf.Metrics.newBuilder(metrics_).mergeFrom(value).buildPartial();
-        } else {
-          metrics_ = value;
-        }
-
-        bitField0_ |= 0x00000004;
-        return this;
-      }
-      /**
-       * <code>optional .ru.hse.spb.message.Metrics metrics = 3;</code>
-       */
-      public Builder clearMetrics() {
-        metrics_ = ru.hse.spb.message.ProtoBuf.Metrics.getDefaultInstance();
-
+      public Builder clearHasNextRequest() {
         bitField0_ = (bitField0_ & ~0x00000004);
+        hasNextRequest_ = false;
+        
         return this;
       }
 
@@ -654,22 +606,22 @@ public final class ProtoBuf {
       com.google.protobuf.MessageLiteOrBuilder {
 
     /**
-     * <code>required int32 sortingTime = 1;</code>
+     * <code>required int64 sortingTime = 1;</code>
      */
     boolean hasSortingTime();
     /**
-     * <code>required int32 sortingTime = 1;</code>
+     * <code>required int64 sortingTime = 1;</code>
      */
-    int getSortingTime();
+    long getSortingTime();
 
     /**
-     * <code>required int32 requestTime = 2;</code>
+     * <code>required int64 requestTime = 2;</code>
      */
     boolean hasRequestTime();
     /**
-     * <code>required int32 requestTime = 2;</code>
+     * <code>required int64 requestTime = 2;</code>
      */
-    int getRequestTime();
+    long getRequestTime();
   }
   /**
    * Protobuf type {@code ru.hse.spb.message.Metrics}
@@ -723,12 +675,12 @@ public final class ProtoBuf {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              sortingTime_ = input.readInt32();
+              sortingTime_ = input.readInt64();
               break;
             }
             case 16: {
               bitField0_ |= 0x00000002;
-              requestTime_ = input.readInt32();
+              requestTime_ = input.readInt64();
               break;
             }
           }
@@ -766,38 +718,38 @@ public final class ProtoBuf {
 
     private int bitField0_;
     public static final int SORTINGTIME_FIELD_NUMBER = 1;
-    private int sortingTime_;
+    private long sortingTime_;
     /**
-     * <code>required int32 sortingTime = 1;</code>
+     * <code>required int64 sortingTime = 1;</code>
      */
     public boolean hasSortingTime() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required int32 sortingTime = 1;</code>
+     * <code>required int64 sortingTime = 1;</code>
      */
-    public int getSortingTime() {
+    public long getSortingTime() {
       return sortingTime_;
     }
 
     public static final int REQUESTTIME_FIELD_NUMBER = 2;
-    private int requestTime_;
+    private long requestTime_;
     /**
-     * <code>required int32 requestTime = 2;</code>
+     * <code>required int64 requestTime = 2;</code>
      */
     public boolean hasRequestTime() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required int32 requestTime = 2;</code>
+     * <code>required int64 requestTime = 2;</code>
      */
-    public int getRequestTime() {
+    public long getRequestTime() {
       return requestTime_;
     }
 
     private void initFields() {
-      sortingTime_ = 0;
-      requestTime_ = 0;
+      sortingTime_ = 0L;
+      requestTime_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -821,10 +773,10 @@ public final class ProtoBuf {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt32(1, sortingTime_);
+        output.writeInt64(1, sortingTime_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt32(2, requestTime_);
+        output.writeInt64(2, requestTime_);
       }
       output.writeRawBytes(unknownFields);
     }
@@ -837,11 +789,11 @@ public final class ProtoBuf {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, sortingTime_);
+          .computeInt64Size(1, sortingTime_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, requestTime_);
+          .computeInt64Size(2, requestTime_);
       }
       size += unknownFields.size();
       memoizedSerializedSize = size;
@@ -937,9 +889,9 @@ public final class ProtoBuf {
 
       public Builder clear() {
         super.clear();
-        sortingTime_ = 0;
+        sortingTime_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
-        requestTime_ = 0;
+        requestTime_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
@@ -1020,66 +972,66 @@ public final class ProtoBuf {
       }
       private int bitField0_;
 
-      private int sortingTime_ ;
+      private long sortingTime_ ;
       /**
-       * <code>required int32 sortingTime = 1;</code>
+       * <code>required int64 sortingTime = 1;</code>
        */
       public boolean hasSortingTime() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required int32 sortingTime = 1;</code>
+       * <code>required int64 sortingTime = 1;</code>
        */
-      public int getSortingTime() {
+      public long getSortingTime() {
         return sortingTime_;
       }
       /**
-       * <code>required int32 sortingTime = 1;</code>
+       * <code>required int64 sortingTime = 1;</code>
        */
-      public Builder setSortingTime(int value) {
+      public Builder setSortingTime(long value) {
         bitField0_ |= 0x00000001;
         sortingTime_ = value;
         
         return this;
       }
       /**
-       * <code>required int32 sortingTime = 1;</code>
+       * <code>required int64 sortingTime = 1;</code>
        */
       public Builder clearSortingTime() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        sortingTime_ = 0;
+        sortingTime_ = 0L;
         
         return this;
       }
 
-      private int requestTime_ ;
+      private long requestTime_ ;
       /**
-       * <code>required int32 requestTime = 2;</code>
+       * <code>required int64 requestTime = 2;</code>
        */
       public boolean hasRequestTime() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required int32 requestTime = 2;</code>
+       * <code>required int64 requestTime = 2;</code>
        */
-      public int getRequestTime() {
+      public long getRequestTime() {
         return requestTime_;
       }
       /**
-       * <code>required int32 requestTime = 2;</code>
+       * <code>required int64 requestTime = 2;</code>
        */
-      public Builder setRequestTime(int value) {
+      public Builder setRequestTime(long value) {
         bitField0_ |= 0x00000002;
         requestTime_ = value;
         
         return this;
       }
       /**
-       * <code>required int32 requestTime = 2;</code>
+       * <code>required int64 requestTime = 2;</code>
        */
       public Builder clearRequestTime() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        requestTime_ = 0;
+        requestTime_ = 0L;
         
         return this;
       }
