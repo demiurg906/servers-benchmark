@@ -1,7 +1,7 @@
 package ru.hse.spb.server
 
+import ru.hse.spb.common.ServerAddresses.smarterServerAddress
 import ru.hse.spb.common.generateMessage
-import ru.hse.spb.common.smarterServerAddress
 import ru.hse.spb.message.ProtoBuf
 import ru.hse.spb.server.common.sortReceivedList
 import java.net.InetSocketAddress

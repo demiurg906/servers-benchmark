@@ -1,8 +1,8 @@
 package ru.hse.spb.server
 
 import com.google.protobuf.GeneratedMessageLite
+import ru.hse.spb.common.ServerAddresses.smartestServerAddress
 import ru.hse.spb.common.generateMessage
-import ru.hse.spb.common.smartestServerAddress
 import ru.hse.spb.message.ProtoBuf
 import ru.hse.spb.server.common.sortReceivedList
 import java.io.ByteArrayOutputStream
@@ -53,7 +53,7 @@ class SmartestServer : Server {
 
     override fun runServer(address: InetSocketAddress) {
         val serverSocketChannel = ServerSocketChannel.open()
-        serverSocketChannel.socket().bind(smartestServerAddress)
+        serverSocketChannel.socket().bind(address)
 
         Thread(this::processIncoming).start()
         Thread(this::processOutgoing).start()
