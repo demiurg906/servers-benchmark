@@ -3,6 +3,7 @@ package ru.hse.spb.client
 import ru.hse.spb.common.generateMessage
 import ru.hse.spb.common.toByteArray
 import ru.hse.spb.message.ProtoBuf
+import ru.hse.spb.runner.ServerType
 import java.io.IOException
 import java.net.Socket
 import java.util.stream.Stream
