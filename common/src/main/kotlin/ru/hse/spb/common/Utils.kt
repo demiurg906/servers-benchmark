@@ -5,9 +5,14 @@ import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 
 object ServerAddresses {
-    val dummyServerAddress = InetSocketAddress("localhost", 8283)
-    val smarterServerAddress = InetSocketAddress("localhost", 8284)
-    val smartestServerAddress = InetSocketAddress("localhost", 8285)
+    var serverAddress: String = "localhost"
+
+    val dummyServerAddress: InetSocketAddress
+        get() = InetSocketAddress(serverAddress, 8283)
+    val smarterServerAddress: InetSocketAddress
+        get() = InetSocketAddress(serverAddress, 8284)
+    val smartestServerAddress: InetSocketAddress
+        get() = InetSocketAddress(serverAddress, 8285)
 }
 
 fun List<Int>.generateMessage(nextRequest: Boolean? = null): ProtoBuf.Message = ProtoBuf.Message.newBuilder().apply {

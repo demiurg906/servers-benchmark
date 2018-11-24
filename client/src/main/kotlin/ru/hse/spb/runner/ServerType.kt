@@ -1,14 +1,12 @@
 package ru.hse.spb.runner
 
-import ru.hse.spb.common.dummyServerAddress
-import ru.hse.spb.common.smarterServerAddress
-import ru.hse.spb.common.smartestServerAddress
+import ru.hse.spb.common.ServerAddresses
 import java.net.InetSocketAddress
 
-enum class ServerType(val hardMode: Boolean, val address: InetSocketAddress) {
-    DUMMY(false, dummyServerAddress),
-    SMARTER(false, smarterServerAddress),
-    SMARTEST(true, smartestServerAddress);
+enum class ServerType(val hardMode: Boolean, val addressGetter: () -> InetSocketAddress) {
+    DUMMY(false, ServerAddresses::dummyServerAddress),
+    SMARTER(false, ServerAddresses::smarterServerAddress),
+    SMARTEST(true, ServerAddresses::smartestServerAddress);
 
     companion object {
         fun fromString(string: String?): ServerType = when (string) {
@@ -18,4 +16,7 @@ enum class ServerType(val hardMode: Boolean, val address: InetSocketAddress) {
             else -> throw IllegalArgumentException("Unknown server type $string")
         }
     }
+
+    val address: InetSocketAddress
+        get() = addressGetter.invoke()
 }

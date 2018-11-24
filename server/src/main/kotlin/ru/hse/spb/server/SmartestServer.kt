@@ -4,6 +4,7 @@ import com.google.protobuf.GeneratedMessageLite
 import ru.hse.spb.common.ServerAddresses.smartestServerAddress
 import ru.hse.spb.common.generateMessage
 import ru.hse.spb.message.ProtoBuf
+import ru.hse.spb.server.common.Config
 import ru.hse.spb.server.common.sortReceivedList
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -14,9 +15,6 @@ import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 import java.util.concurrent.Executors
-
-const val THREAD_POOL_SIZE = 8
-const val TIMEOUT = 50L
 
 class ClientInfo {
     val sizeBuffer: ByteBuffer = ByteBuffer.allocate(4)
@@ -47,9 +45,13 @@ class OutgoingClientInfoWithMetrics(
 class OutgoingClientInfoWithoutMetrics(message: GeneratedMessageLite) : OutgoingClientInfo(message)
 
 class SmartestServer : Server {
+    companion object {
+        const val TIMEOUT = 50L
+    }
+
     private val readSelector = Selector.open()
     private val writeSelector = Selector.open()
-    private val threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE)
+    private val threadPool = Executors.newFixedThreadPool(Config.threadPoolSize)
 
     override fun runServer(address: InetSocketAddress) {
         val serverSocketChannel = ServerSocketChannel.open()

@@ -3,14 +3,13 @@ package ru.hse.spb.server
 import ru.hse.spb.common.ServerAddresses.smarterServerAddress
 import ru.hse.spb.common.generateMessage
 import ru.hse.spb.message.ProtoBuf
+import ru.hse.spb.server.common.Config
 import ru.hse.spb.server.common.sortReceivedList
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
-
-const val THRED_POOL_SIZE = 8
 
 class SmarterServer : Server {
     private val clientsCounter = AtomicInteger(0)
@@ -19,7 +18,7 @@ class SmarterServer : Server {
     override fun runServer(address: InetSocketAddress) {
         val serverSocket = ServerSocket(address.port)
         val receiversThreadPool = Executors.newCachedThreadPool()
-        val workersThreadPool = Executors.newFixedThreadPool(THRED_POOL_SIZE)
+        val workersThreadPool = Executors.newFixedThreadPool(Config.threadPoolSize)
         while (true) {
             val socket = serverSocket.accept()
             val clientId = clientsCounter.getAndIncrement()
