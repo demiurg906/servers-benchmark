@@ -8,6 +8,7 @@ import java.awt.Dimension
 import java.awt.GridLayout
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
+import java.io.File
 import javax.swing.*
 import javax.swing.border.LineBorder
 
@@ -25,8 +26,10 @@ private enum class ValueType(val label: String, val minValue: Int) {
 
 class Gui {
     companion object {
+        const val STATISTICS_FILE = "statistics.csv"
+
         private const val WIDTH = 800
-        private const val HEIGHT = 800
+        private const val HEIGHT = 500
 
         private const val ERROR_WIDTH = 400
         private const val ERROR_HEIGHT = 200
@@ -101,12 +104,13 @@ class Gui {
     }
 
     private fun createFrame(width: Int, height: Int): JFrame = JFrame().apply {
-        layout = GridLayout(2, 1)
+        title = "Server benchmark"
+        layout = BorderLayout()
         preferredSize = Dimension(width, height)
         defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         setLocationRelativeTo(null)
         add(createConfigPanel())
-        add(createGraphPanel())
+        add(createRunButton(), BorderLayout.SOUTH)
 
         pack()
         rangeType = RangeType.N_RANGE
@@ -215,11 +219,6 @@ class Gui {
         add(serverAddressField)
     }
 
-    private fun createGraphPanel(): JPanel = JPanel().apply {
-        layout = BorderLayout()
-        add(createRunButton(), BorderLayout.LINE_END)
-    }
-
     private fun createRunButton(): JButton = button@ JButton().apply {
         text = "Run"
         addActionListener {
@@ -228,9 +227,9 @@ class Gui {
                 val config = collectConfig()
                 ServerAddresses.serverAddress = getServerAddress()
                 val summaryStatistic = collectStatistic(config, serverType)
-                println(summaryStatistic)
-                // TODO: printGraph
+                summaryStatistic.saveToCsv(File(STATISTICS_FILE))
                 isEnabled = true
+                GraphForm(readCsv(Gui.STATISTICS_FILE)).createFrame()
             } catch (e: FormatException) {
                 createErrorFrame(this, e.message)
             }

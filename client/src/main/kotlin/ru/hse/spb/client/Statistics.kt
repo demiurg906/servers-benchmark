@@ -1,7 +1,10 @@
 package ru.hse.spb.client
 
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVPrinter
 import ru.hse.spb.runner.Config
 import ru.hse.spb.runner.RangeType
+import java.io.File
 
 data class RequestStatistic(
     val startTime: Long,
@@ -48,4 +51,16 @@ data class SummaryStatistic(val statistics: Map<Int, AveragedStatistics>, val co
             appendln()
         }
     }.toString()
+
+    fun saveToCsv(file: File) {
+        val header = config.label
+
+        CSVPrinter(file.bufferedWriter(), CSVFormat.DEFAULT.withHeader(header, "Sorting time (s)", "Server response time (s)", "Client response time (s)")).use { printer ->
+            for (key in statistics.keys.sorted()) {
+                val (sortingTime, serverResponseTime, clientResponseTime) = statistics[key] ?: throw IllegalStateException()
+                printer.printRecord(key, sortingTime, serverResponseTime, clientResponseTime)
+            }
+            printer.flush()
+        }
+    }
 }

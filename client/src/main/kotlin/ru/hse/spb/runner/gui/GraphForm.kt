@@ -1,0 +1,97 @@
+package ru.hse.spb.runner.gui
+
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVParser
+import org.jfree.chart.ChartFactory
+import org.jfree.chart.ChartPanel
+import org.jfree.chart.JFreeChart
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
+import org.jfree.data.xy.XYSeries
+import org.jfree.data.xy.XYSeriesCollection
+import java.awt.Dimension
+import java.io.File
+import javax.swing.JFrame
+import javax.swing.JPanel
+
+class GraphForm(val series: Series) {
+    companion object {
+        private const val WIDTH = 600
+        private const val HEIGHT = 600
+    }
+
+    fun createFrame(width: Int = WIDTH, height: Int = HEIGHT): JFrame = JFrame().apply {
+        preferredSize = Dimension(width, height)
+        setLocationRelativeTo(null)
+        add(createChartPanel())
+        pack()
+        defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+        isVisible = true
+    }
+
+    fun createChartPanel(): JPanel = ChartPanel(createChart())
+
+    private fun createChart(): JFreeChart {
+        val dataset = XYSeriesCollection().apply {
+            addSeries(this@GraphForm.series.clientTime)
+            addSeries(this@GraphForm.series.serverTime)
+            addSeries(this@GraphForm.series.sortingTime)
+        }
+
+        return ChartFactory.createScatterPlot(
+            "Statistics",
+            series.xLabel,
+            series.yLabel,
+            dataset
+        ).apply {
+            xyPlot.renderer = XYLineAndShapeRenderer().apply {
+                setSeriesLinesVisible(0, true)
+                setSeriesLinesVisible(1, true)
+                setSeriesLinesVisible(2, true)
+            }
+        }
+    }
+}
+
+data class Series(
+    val xLabel: String,
+    val yLabel: String,
+    val clientTime: XYSeries,
+    val serverTime: XYSeries,
+    val sortingTime: XYSeries
+)
+
+fun readCsv(fileName: String): Series =
+    CSVParser(File(fileName).bufferedReader(), CSVFormat.DEFAULT.withFirstRecordAsHeader()).use { parser ->
+        val headerMap = parser.headerMap.map { (key, value) -> value to key }.toMap()
+        val xLabel = headerMap[0] ?: throw IllegalStateException()
+        val sortingTime = XYSeries(headerMap[1] ?: throw IllegalStateException())
+        val serverTime = XYSeries(headerMap[2] ?: throw IllegalStateException())
+        val clientTime = XYSeries(headerMap[3] ?: throw IllegalStateException())
+        for (record in parser.records) {
+            val x = record[0].toInt()
+            sortingTime.add(x, record[1].toDouble())
+            serverTime.add(x, record[2].toDouble())
+            clientTime.add(x, record[3].toDouble())
+        }
+        Series(xLabel, "seconds", clientTime, serverTime, sortingTime)
+    }
+
+//fun oldReadCsv(fileName: String): Series {
+//    val clientTime = XYSeries("client time")
+//    val serverTime = XYSeries("server time")
+//    val sortingTime = XYSeries("sorting time")
+//    File(fileName).useLines { line ->
+//        val allValues = line.map { it.split(",").map { it.removeSurrounding("\"") }.map(String::toDouble) }.toList()
+//        for (values in allValues) {
+//            val value = values[0]
+//            clientTime.add(value, values[1])
+//            serverTime.add(value, values[2])
+//            sortingTime.add(value, values[3])
+//        }
+//    }
+//    return Series(clientTime, serverTime, sortingTime)
+//}
+
+fun main(args: Array<String>) {
+    GraphForm(readCsv(Gui.STATISTICS_FILE)).createFrame()
+}
