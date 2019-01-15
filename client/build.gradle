@@ -8,7 +8,8 @@ repositories {
 
 dependencies {
     compile(project(":common"))
-    compile "io.ktor:ktor-network:$ktor_version"
     compile group: 'org.jfree', name: 'jfreechart', version: '1.5.0'
     compile group: 'org.apache.commons', name: 'commons-csv', version: '1.6'
 }
+
+mainClassName = 'ru.hse.spb.runner.gui.GuiFormKt'
