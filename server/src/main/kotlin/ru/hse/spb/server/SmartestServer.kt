@@ -15,15 +15,26 @@ import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 
 class ClientInfo {
+    companion object {
+        private val idCounter = AtomicInteger()
+    }
+
+    val id = idCounter.getAndIncrement()
+
     val sizeBuffer: ByteBuffer = ByteBuffer.allocate(4)
     var messageBuffer: ByteBuffer? = null
 
     var size: Int? = null
+
+    override fun toString(): String {
+        return "client $id"
+    }
 }
 
-sealed class OutgoingClientInfo(message: GeneratedMessageLite) {
+sealed class OutgoingClientInfo(message: GeneratedMessageLite, val clientInfo: ClientInfo) {
     val buffer: ByteBuffer = ByteBuffer.allocate(4 + message.serializedSize)
 
     init {
@@ -36,83 +47,114 @@ sealed class OutgoingClientInfo(message: GeneratedMessageLite) {
 
 class OutgoingClientInfoWithMetrics(
     message: GeneratedMessageLite,
+    clientInfo: ClientInfo,
     var startTime: Long,
     val sortingTime: Long
-) : OutgoingClientInfo(message) {
+) : OutgoingClientInfo(message, clientInfo) {
     fun inStartPosition(): Boolean = buffer.inStartPosition()
 }
 
-class OutgoingClientInfoWithoutMetrics(message: GeneratedMessageLite) : OutgoingClientInfo(message)
+class OutgoingClientInfoWithoutMetrics(message: GeneratedMessageLite, clientInfo: ClientInfo) :
+    OutgoingClientInfo(message, clientInfo)
 
 class SmartestServer : Server {
     companion object {
         const val TIMEOUT = 50L
     }
 
-    private val readSelector = Selector.open()
-    private val writeSelector = Selector.open()
+    private val incomingSelector = Selector.open()
+    private val outgoingSelector = Selector.open()
     private val threadPool = Executors.newFixedThreadPool(Config.threadPoolSize)
 
     override fun runServer(address: InetSocketAddress) {
         val serverSocketChannel = ServerSocketChannel.open()
         serverSocketChannel.socket().bind(address)
+        serverSocketChannel.configureBlocking(false)
+        serverSocketChannel.register(incomingSelector, SelectionKey.OP_ACCEPT)
 
-        Thread(this::processIncoming).start()
         Thread(this::processOutgoing).start()
 
         while (true) {
-            val socketChannel = serverSocketChannel.accept()
-            socketChannel.configureBlocking(false)
-            println("accepted")
-            socketChannel.register(readSelector, SelectionKey.OP_READ, ClientInfo())
-        }
-    }
-
-    private fun processIncoming() {
-        while (true) {
-            readSelector.select(TIMEOUT)
-            val selectedKeys = readSelector.selectedKeys()
+            incomingSelector.select()
+            val selectedKeys = incomingSelector.selectedKeys()
             val iterator = selectedKeys.iterator()
             while (iterator.hasNext()) {
                 val key = iterator.next()
-                iterator.remove()
-                val channel = key.channel() as SocketChannel
-                val clientInfo = key.attachment() as ClientInfo
-                if (clientInfo.size == null) {
-                    val buffer = clientInfo.sizeBuffer
-                    channel.read(buffer)
-                    if (buffer.isFull()) {
-                        buffer.flip()
-                        val size = buffer.int
-                        clientInfo.size = size
-                        buffer.clear()
-                        clientInfo.messageBuffer = ByteBuffer.allocate(size)
-                    }
-                } else {
-                    val buffer = clientInfo.messageBuffer
-                    requireNotNull(buffer)
-                    channel.read(buffer)
-                    if (buffer.isFull()) {
-                        val bytes = ByteArray(buffer.capacity())
-                        buffer.flip()
-                        buffer.get(bytes)
-                        clientInfo.size = null
-                        threadPool.execute(Worker(bytes, System.currentTimeMillis(), key))
-                    }
+                when {
+                    key.isAcceptable -> registerClient(serverSocketChannel)
+                    key.isReadable -> receiveClient(key)
                 }
+                iterator.remove()
             }
         }
     }
 
+    private fun registerClient(serverSocketChannel: ServerSocketChannel) {
+        try {
+            val client = serverSocketChannel.accept()
+            client.configureBlocking(false)
+            val clientInfo = ClientInfo()
+            client.register(incomingSelector, SelectionKey.OP_READ, clientInfo)
+            println("$clientInfo connected")
+        } catch (e: IOException) {
+            println("Can not accept client")
+        }
+    }
+
+    private fun receiveClient(key: SelectionKey) {
+        val channel = key.channel() as SocketChannel
+        val clientInfo = key.attachment() as ClientInfo
+
+        try {
+            if (clientInfo.size == null) {
+                val buffer = clientInfo.sizeBuffer
+                val readBytes = channel.read(buffer)
+                if (readBytes == -1) {
+                    println("We lost $clientInfo")
+                    key.cancel()
+                    return
+                }
+
+                if (buffer.isFull()) {
+                    buffer.flip()
+                    val size = buffer.int
+                    clientInfo.size = size
+                    buffer.clear()
+                    clientInfo.messageBuffer = ByteBuffer.allocate(size)
+                }
+            } else {
+                val buffer = clientInfo.messageBuffer
+                requireNotNull(buffer)
+                val readBytes = channel.read(buffer)
+                if (readBytes == -1) {
+                    println("We lost $clientInfo")
+                    key.cancel()
+                    return
+                }
+                if (buffer.isFull()) {
+                    val bytes = ByteArray(buffer.capacity())
+                    buffer.flip()
+                    buffer.get(bytes)
+                    clientInfo.size = null
+                    threadPool.execute(Worker(bytes, System.currentTimeMillis(), key))
+                }
+            }
+        } catch (e: IOException) {
+            println("We lost $clientInfo: ${e.message}")
+            key.cancel()
+        }
+        println("Message from $clientInfo received")
+    }
+
     private fun processOutgoing() {
         while (true) {
-            writeSelector.select(TIMEOUT)
-            val selectedKeys = writeSelector.selectedKeys()
+            outgoingSelector.select(TIMEOUT)
+            val selectedKeys = outgoingSelector.selectedKeys()
             val iterator = selectedKeys.iterator()
             while (iterator.hasNext()) {
                 val key = iterator.next()
                 iterator.remove()
-                val info = key.attachment()
+                val info = key.attachment() as OutgoingClientInfo
                 val channel = key.channel() as SocketChannel
                 try {
                     when (info) {
@@ -121,16 +163,18 @@ class SmartestServer : Server {
                                 info.startTime = System.currentTimeMillis() - info.startTime
                             }
                             channel.write(info.buffer)
+                            println("Answer to ${info.clientInfo} send")
                             if (info.buffer.isFull()) {
                                 val metrics = ProtoBuf.Metrics.newBuilder().apply {
                                     sortingTime = info.sortingTime
                                     requestTime = info.startTime
                                 }.build()
-                                key.attach(OutgoingClientInfoWithoutMetrics(metrics))
+                                key.attach(OutgoingClientInfoWithoutMetrics(metrics, info.clientInfo))
                             }
                         }
                         is OutgoingClientInfoWithoutMetrics -> {
                             channel.write(info.buffer)
+                            println("Metrics to ${info.clientInfo} send")
                             if (info.buffer.isFull()) {
                                 key.cancel()
                             }
@@ -138,7 +182,8 @@ class SmartestServer : Server {
 
                     }
                 } catch (e: IOException) {
-                    println("we lost client. ${e.message}")
+                    key.cancel()
+                    println("We lost ${info.clientInfo}: ${e.message}")
                 }
             }
         }
@@ -150,14 +195,17 @@ class SmartestServer : Server {
             if (!message.hasNextRequest) {
                 key.cancel()
             }
+            val clientInfo = key.attachment() as ClientInfo
             val channel = key.channel() as SocketChannel
             val (sortingTime, sortedList) = sortReceivedList(message)
             val outgoingClientInfo = OutgoingClientInfoWithMetrics(
                 sortedList.generateMessage(),
+                clientInfo,
                 startTime,
                 sortingTime
             )
-            channel.register(writeSelector, SelectionKey.OP_WRITE, outgoingClientInfo)
+            channel.register(outgoingSelector, SelectionKey.OP_WRITE, outgoingClientInfo)
+            outgoingSelector.wakeup()
         }
     }
 }
