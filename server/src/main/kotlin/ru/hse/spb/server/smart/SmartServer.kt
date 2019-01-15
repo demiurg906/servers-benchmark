@@ -46,6 +46,7 @@ class SmartServer : Server {
                     e.log()
                     return
                 }
+                println("Message from client $id received")
                 val startTime = System.currentTimeMillis()
                 workersThreadPool.submit {
                     val (sortingTime, sortedList) = sortReceivedList(message)
@@ -54,12 +55,14 @@ class SmartServer : Server {
                         val endTime = System.currentTimeMillis()
                         try {
                             answer.writeDelimitedTo(socket.outputStream)
+                            println("Answer to client $id send")
 
                             val metrics = ProtoBuf.Metrics.newBuilder()
                                 .setSortingTime(sortingTime)
                                 .setRequestTime(endTime - startTime)
                                 .build()
                             metrics.writeDelimitedTo(socket.outputStream)
+                            println("Metrics to client $id send")
 
                             if (!aliveClients.containsKey(id)) {
                                 replierThreadPool.shutdown()

@@ -38,6 +38,7 @@ class Worker(private val socket: Socket) : Runnable {
         try {
             while (true) {
                 val receivedMessage = ProtoBuf.Message.parseDelimitedFrom(socket.inputStream)
+                println("Message from client $id received")
 
                 // handle request
                 val startTime = System.currentTimeMillis()
@@ -47,6 +48,7 @@ class Worker(private val socket: Socket) : Runnable {
 
                 // send response
                 message.writeDelimitedTo(socket.outputStream)
+                println("Answer to client $id send")
 
                 // send metrics
                 val metrics = ProtoBuf.Metrics.newBuilder()
@@ -54,6 +56,7 @@ class Worker(private val socket: Socket) : Runnable {
                     .setRequestTime(endTime - startTime)
                     .build()
                 metrics.writeDelimitedTo(socket.outputStream)
+                println("Metrics to client $id send")
                 if (!receivedMessage.hasNextRequest) {
                     break
                 }
