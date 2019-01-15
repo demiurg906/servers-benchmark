@@ -30,6 +30,7 @@ private enum class ValueType(val label: String, val minValue: Int) {
 class Gui {
     companion object {
         const val STATISTICS_FILE = "statistics"
+        const val STATISTICS_FOLDER = "statistics"
 
         private const val WIDTH = 800
         private const val HEIGHT = 500
@@ -96,6 +97,11 @@ class Gui {
         }
 
     fun runApplication(width: Int = WIDTH, height: Int = HEIGHT) {
+        val statisticsFolder = File(STATISTICS_FOLDER)
+        if (!statisticsFolder.exists()) {
+            statisticsFolder.mkdir()
+        }
+
         createFrame(width, height).apply {
             isVisible = true
         }
@@ -248,7 +254,7 @@ class Gui {
                     try {
                         val summaryStatistic = collectStatistic(config, serverType, clientsThreadPool)
                         val statisticsFile = statisticsFileField.text.ifEmpty { STATISTICS_FILE } + ".csv"
-                        summaryStatistic.saveToCsv(File(statisticsFile))
+                        summaryStatistic.saveToCsv(File("$STATISTICS_FOLDER/$statisticsFile"))
                         isEnabled = true
                         GraphForm(readCsv(statisticsFile)).createFrame()
                     } catch (e: Exception) {
