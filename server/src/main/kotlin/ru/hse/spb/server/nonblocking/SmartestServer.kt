@@ -1,9 +1,10 @@
-package ru.hse.spb.server
+package ru.hse.spb.server.nonblocking
 
 import com.google.protobuf.GeneratedMessageLite
 import ru.hse.spb.common.ServerAddresses.smartestServerAddress
 import ru.hse.spb.common.generateMessage
 import ru.hse.spb.message.ProtoBuf
+import ru.hse.spb.server.Server
 import ru.hse.spb.server.common.Config
 import ru.hse.spb.server.common.sortReceivedList
 import java.io.ByteArrayOutputStream
@@ -169,7 +170,12 @@ class SmartestServer : Server {
                                     sortingTime = info.sortingTime
                                     requestTime = info.startTime
                                 }.build()
-                                key.attach(OutgoingClientInfoWithoutMetrics(metrics, info.clientInfo))
+                                key.attach(
+                                    OutgoingClientInfoWithoutMetrics(
+                                        metrics,
+                                        info.clientInfo
+                                    )
+                                )
                             }
                         }
                         is OutgoingClientInfoWithoutMetrics -> {

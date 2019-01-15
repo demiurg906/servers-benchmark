@@ -1,8 +1,9 @@
-package ru.hse.spb.server
+package ru.hse.spb.server.dummy
 
 import ru.hse.spb.common.ServerAddresses.dummyServerAddress
 import ru.hse.spb.common.generateMessage
 import ru.hse.spb.message.ProtoBuf
+import ru.hse.spb.server.Server
 import ru.hse.spb.server.common.sortReceivedList
 import java.net.InetSocketAddress
 import java.net.ServerSocket
