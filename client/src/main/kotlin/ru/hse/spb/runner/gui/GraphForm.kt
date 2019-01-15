@@ -76,22 +76,6 @@ fun readCsv(fileName: String): Series =
         Series(xLabel, "seconds", clientTime, serverTime, sortingTime)
     }
 
-//fun oldReadCsv(fileName: String): Series {
-//    val clientTime = XYSeries("client time")
-//    val serverTime = XYSeries("server time")
-//    val sortingTime = XYSeries("sorting time")
-//    File(fileName).useLines { line ->
-//        val allValues = line.map { it.split(",").map { it.removeSurrounding("\"") }.map(String::toDouble) }.toList()
-//        for (values in allValues) {
-//            val value = values[0]
-//            clientTime.add(value, values[1])
-//            serverTime.add(value, values[2])
-//            sortingTime.add(value, values[3])
-//        }
-//    }
-//    return Series(clientTime, serverTime, sortingTime)
-//}
-
 fun main(args: Array<String>) {
     GraphForm(readCsv(Gui.STATISTICS_FILE)).createFrame()
 }

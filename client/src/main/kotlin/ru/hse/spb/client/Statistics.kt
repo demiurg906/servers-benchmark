@@ -20,8 +20,8 @@ data class AveragedStatistics(
     val clientResponseTime: Double
 ) {
     override fun toString(): String = "Client response time is %.3f seconds\n".format(clientResponseTime) +
-        "Server response time is %.3f seconds\n".format(serverResponseTime) +
-        "Sorting time is %.3f seconds".format(sortingTime)
+            "Server response time is %.3f seconds\n".format(serverResponseTime) +
+            "Sorting time is %.3f seconds".format(sortingTime)
 }
 
 data class ClientStatistic(val startTime: Long, val endTime: Long, val requests: List<RequestStatistic>)
@@ -29,12 +29,12 @@ data class ClientStatistic(val startTime: Long, val endTime: Long, val requests:
 fun List<ClientStatistic>.calculateAverage(): AveragedStatistics {
     val lastStartTime = minBy { it.startTime }?.startTime ?: 0
     val firstEndTime = maxBy { it.endTime }?.endTime ?: 0
-    
+
     val requestStatistics = flatMap { it.requests }
         .filter { it.startTime >= lastStartTime && it.endTime <= firstEndTime }
 
     fun Int.transform() = this.toDouble() / requestStatistics.size / 1000
-    
+
     return AveragedStatistics(
         requestStatistics.sumBy { it.sortingTime.toInt() }.transform(),
         requestStatistics.sumBy { it.serverResponseTime.toInt() }.transform(),
@@ -42,7 +42,11 @@ fun List<ClientStatistic>.calculateAverage(): AveragedStatistics {
     )
 }
 
-data class SummaryStatistic(val statistics: Map<Int, AveragedStatistics>, val config: Config,  val rangeType: RangeType) {
+data class SummaryStatistic(
+    val statistics: Map<Int, AveragedStatistics>,
+    val config: Config,
+    val rangeType: RangeType
+) {
     override fun toString(): String = StringBuilder().apply {
         appendln(config)
         for (key in statistics.keys.sorted()) {
@@ -55,9 +59,18 @@ data class SummaryStatistic(val statistics: Map<Int, AveragedStatistics>, val co
     fun saveToCsv(file: File) {
         val header = config.label
 
-        CSVPrinter(file.bufferedWriter(), CSVFormat.DEFAULT.withHeader(header, "Sorting time (s)", "Server response time (s)", "Client response time (s)")).use { printer ->
+        CSVPrinter(
+            file.bufferedWriter(),
+            CSVFormat.DEFAULT.withHeader(
+                header,
+                "Sorting time (s)",
+                "Server response time (s)",
+                "Client response time (s)"
+            )
+        ).use { printer ->
             for (key in statistics.keys.sorted()) {
-                val (sortingTime, serverResponseTime, clientResponseTime) = statistics[key] ?: throw IllegalStateException()
+                val (sortingTime, serverResponseTime, clientResponseTime) = statistics[key]
+                    ?: throw IllegalStateException()
                 printer.printRecord(key, sortingTime, serverResponseTime, clientResponseTime)
             }
             printer.flush()

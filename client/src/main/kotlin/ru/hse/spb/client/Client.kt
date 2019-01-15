@@ -56,7 +56,7 @@ class Client(
                         println("Feels bad, man. Cause ${e.message}")
                     }
                     try {
-                        Thread.sleep(delta.toLong() * 1000)
+                        Thread.sleep(delta.toLong())
                     } catch (e: InterruptedException) {
                         break
                     }

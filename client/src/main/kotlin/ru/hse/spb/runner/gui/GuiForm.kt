@@ -26,7 +26,7 @@ private enum class ValueType(val label: String, val minValue: Int) {
 
 class Gui {
     companion object {
-        const val STATISTICS_FILE = "statistics.csv"
+        const val STATISTICS_FILE = "statistics"
 
         private const val WIDTH = 800
         private const val HEIGHT = 500
@@ -58,8 +58,10 @@ class Gui {
     private val deltaStep = JFormattedTextField().initValue(1)
     private val deltaFields: Fields = deltaField to listOf(deltaStart, deltaEnd, deltaStep)
 
-    private val xField = JFormattedTextField().initValue(10)
+    private val xField = JFormattedTextField().initValue(5)
     private val serverAddressField = JFormattedTextField().initValue("127.0.0.1")
+//    private val serverAddressField = JFormattedTextField().initValue("192.168.1.151")
+    private val statisticsFileField = JFormattedTextField().initValue(STATISTICS_FILE)
 
 
     private var serverType: ServerType = ServerType.DUMMY
@@ -122,7 +124,7 @@ class Gui {
         add(createRangeTypePanel())
         add(createPanelWithConfigs("Choose N", nFields))
         add(createPanelWithConfigs("Choose M", mFields))
-        add(createPanelWithConfigs("Choose Delta", deltaFields))
+        add(createPanelWithConfigs("Choose Delta (ms)", deltaFields))
         add(createPanelWithX())
 
     }
@@ -211,12 +213,14 @@ class Gui {
     }
 
     private fun createPanelWithX(): JPanel = JPanel().apply {
-        layout = GridLayout(2, 2)
+        layout = GridLayout(3, 2)
         createBorder()
         add(JLabel("X value"))
         add(xField)
         add(JLabel("Server address"))
         add(serverAddressField)
+        add(JLabel("Output file"))
+        add(statisticsFileField)
     }
 
     private fun createRunButton(): JButton = button@ JButton().apply {
@@ -227,9 +231,10 @@ class Gui {
                 val config = collectConfig()
                 ServerAddresses.serverAddress = getServerAddress()
                 val summaryStatistic = collectStatistic(config, serverType)
-                summaryStatistic.saveToCsv(File(STATISTICS_FILE))
+                val statisticsFile = statisticsFileField.text.ifEmpty { STATISTICS_FILE } + ".csv"
+                summaryStatistic.saveToCsv(File(statisticsFile))
                 isEnabled = true
-                GraphForm(readCsv(Gui.STATISTICS_FILE)).createFrame()
+                GraphForm(readCsv(statisticsFile)).createFrame()
             } catch (e: FormatException) {
                 createErrorFrame(this, e.message)
             }
@@ -323,14 +328,12 @@ class Gui {
         return value
     }
 
-    private fun JFormattedTextField.getInt() = try {
+    private fun JFormattedTextField.getInt(): Int = try {
         text.toInt()
     } catch (e: NumberFormatException) {
         throw FormatException("\"$text\" is not an integer")
     }
 }
-
-class FormatException(message: String?) : Exception(message)
 
 fun main(args: Array<String>) {
     Gui().runApplication()
