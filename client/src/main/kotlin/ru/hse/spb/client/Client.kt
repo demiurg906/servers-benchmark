@@ -52,8 +52,7 @@ class Client(
                             metrics.sortingTime
                         )
                     } catch (e: IOException) {
-                        // TODO log it
-                        println("Feels bad, man. Cause ${e.message}")
+                        throw ClientExecutionException(e.message)
                     }
                     try {
                         Thread.sleep(delta.toLong())
@@ -63,8 +62,7 @@ class Client(
                 }
             }
         } catch (e: IOException) {
-            // TODO log it
-            println("Feels bad, man. Cause ${e.message}")
+            throw ClientExecutionException(e.message)
         }
         val servingEndTime = System.currentTimeMillis()
         return ClientStatistic(servingStartTime, servingEndTime, requestsStatistics)

@@ -8,7 +8,10 @@ import java.awt.Dimension
 import java.awt.GridLayout
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 import java.io.File
+import java.util.concurrent.Executors
 import javax.swing.*
 import javax.swing.border.LineBorder
 
@@ -31,11 +34,14 @@ class Gui {
         private const val WIDTH = 800
         private const val HEIGHT = 500
 
-        private const val ERROR_WIDTH = 400
+        private const val ERROR_WIDTH = 600
         private const val ERROR_HEIGHT = 200
 
         private val ipRegex = Regex("\\d\\d?\\d?.\\d\\d?\\d?.\\d\\d?\\d?.\\d\\d?\\d?")
     }
+
+    private val backgroundThreadPool = Executors.newSingleThreadExecutor()
+    private val clientsThreadPool = Executors.newCachedThreadPool()
 
     private fun JFormattedTextField.initValue(value: Int) = this.apply { text = value.toString() }
     private fun JFormattedTextField.initValue(value: String) = this.apply { text = value }
@@ -110,6 +116,13 @@ class Gui {
         layout = BorderLayout()
         preferredSize = Dimension(width, height)
         defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+        addWindowListener(object : WindowAdapter() {
+            override fun windowClosing(e: WindowEvent?) {
+                clientsThreadPool.shutdownNow()
+                backgroundThreadPool.shutdownNow()
+            }
+        })
+
         setLocationRelativeTo(null)
         add(createConfigPanel())
         add(createRunButton(), BorderLayout.SOUTH)
@@ -230,11 +243,19 @@ class Gui {
             try {
                 val config = collectConfig()
                 ServerAddresses.serverAddress = getServerAddress()
-                val summaryStatistic = collectStatistic(config, serverType)
-                val statisticsFile = statisticsFileField.text.ifEmpty { STATISTICS_FILE } + ".csv"
-                summaryStatistic.saveToCsv(File(statisticsFile))
-                isEnabled = true
-                GraphForm(readCsv(statisticsFile)).createFrame()
+
+                backgroundThreadPool.submit {
+                    try {
+                        val summaryStatistic = collectStatistic(config, serverType, clientsThreadPool)
+                        val statisticsFile = statisticsFileField.text.ifEmpty { STATISTICS_FILE } + ".csv"
+                        summaryStatistic.saveToCsv(File(statisticsFile))
+                        isEnabled = true
+                        GraphForm(readCsv(statisticsFile)).createFrame()
+                    } catch (e: Exception) {
+                        createErrorFrame(this, "Something went wrong: ${e.message}")
+                        e.printStackTrace()
+                    }
+                }
             } catch (e: FormatException) {
                 createErrorFrame(this, e.message)
             }
