@@ -223,7 +223,7 @@ class Gui {
         add(statisticsFileField)
     }
 
-    private fun createRunButton(): JButton = button@ JButton().apply {
+    private fun createRunButton(): JButton = JButton().apply {
         text = "Run"
         addActionListener {
             isEnabled = false

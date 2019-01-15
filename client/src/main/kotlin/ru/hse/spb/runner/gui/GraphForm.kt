@@ -13,7 +13,7 @@ import java.io.File
 import javax.swing.JFrame
 import javax.swing.JPanel
 
-class GraphForm(val series: Series) {
+class GraphForm(private val series: Series) {
     companion object {
         private const val WIDTH = 600
         private const val HEIGHT = 600
@@ -28,7 +28,7 @@ class GraphForm(val series: Series) {
         isVisible = true
     }
 
-    fun createChartPanel(): JPanel = ChartPanel(createChart())
+    private fun createChartPanel(): JPanel = ChartPanel(createChart())
 
     private fun createChart(): JFreeChart {
         val dataset = XYSeriesCollection().apply {

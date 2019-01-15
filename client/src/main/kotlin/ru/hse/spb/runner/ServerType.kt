@@ -3,7 +3,7 @@ package ru.hse.spb.runner
 import ru.hse.spb.common.ServerAddresses
 import java.net.InetSocketAddress
 
-enum class ServerType(val hardMode: Boolean, val addressGetter: () -> InetSocketAddress) {
+enum class ServerType(val hardMode: Boolean, private val addressGetter: () -> InetSocketAddress) {
     DUMMY(false, ServerAddresses::dummyServerAddress),
     SMARTER(false, ServerAddresses::smarterServerAddress),
     SMARTEST(true, ServerAddresses::smartestServerAddress);
