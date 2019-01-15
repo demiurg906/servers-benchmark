@@ -86,6 +86,10 @@ class SmartServer : Server {
     }
 }
 
-fun main(args: Array<String>) {
+internal fun runSmartServer() {
     SmartServer().runServer(smartServerAddress)
+}
+
+fun main(args: Array<String>) {
+    runSmartServer()
 }

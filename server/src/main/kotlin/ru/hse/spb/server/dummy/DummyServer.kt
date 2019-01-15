@@ -67,7 +67,10 @@ class Worker(private val socket: Socket) : Runnable {
     }
 }
 
+internal fun runDummyServer() {
+    DummyServer().runServer(dummyServerAddress)
+}
+
 fun main(args: Array<String>) {
-    val server = DummyServer()
-    server.runServer(dummyServerAddress)
+    runDummyServer()
 }

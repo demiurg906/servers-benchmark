@@ -174,6 +174,10 @@ class NonBlockingServer : Server {
     }
 }
 
-fun main() {
+internal fun runNonBlockingServer() {
     NonBlockingServer().runServer(nonBlockingServerAddress)
+}
+
+fun main() {
+    runNonBlockingServer()
 }

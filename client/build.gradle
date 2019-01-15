@@ -13,3 +13,9 @@ dependencies {
 }
 
 mainClassName = 'ru.hse.spb.runner.gui.GuiFormKt'
+
+shadowJar {
+    baseName = "serversBenchmarkGui"
+    classifier = null
+    version = null
+}
