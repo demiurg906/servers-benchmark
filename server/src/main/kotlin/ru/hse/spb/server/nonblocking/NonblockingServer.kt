@@ -1,13 +1,11 @@
 package ru.hse.spb.server.nonblocking
 
-import com.google.protobuf.GeneratedMessageLite
 import ru.hse.spb.common.ServerAddresses.smartestServerAddress
 import ru.hse.spb.common.generateMessage
 import ru.hse.spb.message.ProtoBuf
 import ru.hse.spb.server.Server
 import ru.hse.spb.server.common.Config
 import ru.hse.spb.server.common.sortReceivedList
-import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -16,56 +14,16 @@ import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicInteger
 
-class ClientInfo {
-    companion object {
-        private val idCounter = AtomicInteger()
-    }
-
-    val id = idCounter.getAndIncrement()
-
-    val sizeBuffer: ByteBuffer = ByteBuffer.allocate(4)
-    var messageBuffer: ByteBuffer? = null
-
-    var size: Int? = null
-
-    override fun toString(): String {
-        return "client $id"
-    }
-}
-
-sealed class OutgoingClientInfo(message: GeneratedMessageLite, val clientInfo: ClientInfo) {
-    val buffer: ByteBuffer = ByteBuffer.allocate(4 + message.serializedSize)
-
-    init {
-        val stream = ByteArrayOutputStream()
-        message.writeDelimitedTo(stream)
-        buffer.put(stream.toByteArray())
-        buffer.flip()
-    }
-}
-
-class OutgoingClientInfoWithMetrics(
-    message: GeneratedMessageLite,
-    clientInfo: ClientInfo,
-    var startTime: Long,
-    val sortingTime: Long
-) : OutgoingClientInfo(message, clientInfo) {
-    fun inStartPosition(): Boolean = buffer.inStartPosition()
-}
-
-class OutgoingClientInfoWithoutMetrics(message: GeneratedMessageLite, clientInfo: ClientInfo) :
-    OutgoingClientInfo(message, clientInfo)
-
-class SmartestServer : Server {
+class NonblockingServer : Server {
     companion object {
         const val TIMEOUT = 50L
     }
 
     private val incomingSelector = Selector.open()
     private val outgoingSelector = Selector.open()
-    private val threadPool = Executors.newFixedThreadPool(Config.threadPoolSize)
+    private val threadPool =
+        Executors.newFixedThreadPool(Config.threadPoolSize)
 
     override fun runServer(address: InetSocketAddress) {
         val serverSocketChannel = ServerSocketChannel.open()
@@ -98,7 +56,7 @@ class SmartestServer : Server {
             client.register(incomingSelector, SelectionKey.OP_READ, clientInfo)
             println("$clientInfo connected")
         } catch (e: IOException) {
-            println("Can not accept client")
+            println("Can not accept client: ${e.message}")
         }
     }
 
@@ -216,9 +174,6 @@ class SmartestServer : Server {
     }
 }
 
-private fun ByteBuffer.isFull(): Boolean = position() == limit()
-private fun ByteBuffer.inStartPosition(): Boolean = position() == 0
-
 fun main() {
-    SmartestServer().runServer(smartestServerAddress)
+    NonblockingServer().runServer(smartestServerAddress)
 }
