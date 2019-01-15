@@ -1,6 +1,6 @@
 package ru.hse.spb.server.nonblocking
 
-import ru.hse.spb.common.ServerAddresses.smartestServerAddress
+import ru.hse.spb.common.ServerAddresses.nonBlockingServerAddress
 import ru.hse.spb.common.generateMessage
 import ru.hse.spb.message.ProtoBuf
 import ru.hse.spb.server.Server
@@ -15,7 +15,7 @@ import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 import java.util.concurrent.Executors
 
-class NonblockingServer : Server {
+class NonBlockingServer : Server {
     companion object {
         const val TIMEOUT = 50L
     }
@@ -175,5 +175,5 @@ class NonblockingServer : Server {
 }
 
 fun main() {
-    NonblockingServer().runServer(smartestServerAddress)
+    NonBlockingServer().runServer(nonBlockingServerAddress)
 }

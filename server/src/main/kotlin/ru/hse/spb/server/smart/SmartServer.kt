@@ -1,6 +1,6 @@
 package ru.hse.spb.server.smart
 
-import ru.hse.spb.common.ServerAddresses.smarterServerAddress
+import ru.hse.spb.common.ServerAddresses.smartServerAddress
 import ru.hse.spb.common.generateMessage
 import ru.hse.spb.message.ProtoBuf
 import ru.hse.spb.server.Server
@@ -87,5 +87,5 @@ class SmartServer : Server {
 }
 
 fun main(args: Array<String>) {
-    SmartServer().runServer(smarterServerAddress)
+    SmartServer().runServer(smartServerAddress)
 }

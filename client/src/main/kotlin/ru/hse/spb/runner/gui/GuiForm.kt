@@ -23,7 +23,7 @@ fun List<JComponent>.disable() = forEach { it.isEnabled = false }
 private enum class ValueType(val label: String, val minValue: Int) {
     N("N", 100),
     M("M", 1),
-    DELTA("Delta", 0),
+    DELTA("Delta (ms)", 0),
     X("X", 1)
 }
 
@@ -159,16 +159,16 @@ class Gui {
             addActionListener { serverType = ServerType.DUMMY }
         }.addToPanel()
 
-        add(JLabel("Smarter server"))
+        add(JLabel("Smart server"))
         JRadioButton().apply {
             isSelected = false
-            addActionListener { serverType = ServerType.SMARTER }
+            addActionListener { serverType = ServerType.SMART }
         }.addToPanel()
 
-        add(JLabel("Smartest server"))
+        add(JLabel("Non-blocking server"))
         JRadioButton().apply {
             isSelected = false
-            addActionListener { serverType = ServerType.SMARTEST }
+            addActionListener { serverType = ServerType.NON_BLOCKING }
         }.addToPanel()
     }
 

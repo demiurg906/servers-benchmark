@@ -9,9 +9,9 @@ object ServerAddresses {
 
     val dummyServerAddress: InetSocketAddress
         get() = InetSocketAddress(serverAddress, 8283)
-    val smarterServerAddress: InetSocketAddress
+    val smartServerAddress: InetSocketAddress
         get() = InetSocketAddress(serverAddress, 8284)
-    val smartestServerAddress: InetSocketAddress
+    val nonBlockingServerAddress: InetSocketAddress
         get() = InetSocketAddress(serverAddress, 8285)
 }
 
