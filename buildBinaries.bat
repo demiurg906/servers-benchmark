@@ -1,0 +1,1 @@
+gradlew.bat client:startShadowScripts server:startShadowScripts
