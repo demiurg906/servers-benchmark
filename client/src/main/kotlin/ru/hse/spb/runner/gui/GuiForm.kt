@@ -253,8 +253,8 @@ class Gui {
                 backgroundThreadPool.submit {
                     try {
                         val summaryStatistic = collectStatistic(config, serverType, clientsThreadPool)
-                        val statisticsFile = statisticsFileField.text.ifEmpty { STATISTICS_FILE } + ".csv"
-                        summaryStatistic.saveToCsv(File("$STATISTICS_FOLDER/$statisticsFile"))
+                        val statisticsFile = "$STATISTICS_FOLDER/" + statisticsFileField.text.ifEmpty { STATISTICS_FILE } + ".csv"
+                        summaryStatistic.saveToCsv(File(statisticsFile))
                         isEnabled = true
                         GraphForm(readCsv(statisticsFile)).createFrame()
                     } catch (e: Exception) {
