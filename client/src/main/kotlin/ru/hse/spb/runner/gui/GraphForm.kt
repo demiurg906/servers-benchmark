@@ -19,12 +19,12 @@ class GraphForm(private val series: Series) {
         private const val HEIGHT = 600
     }
 
-    fun createFrame(width: Int = WIDTH, height: Int = HEIGHT): JFrame = JFrame().apply {
+    fun createFrame(width: Int = WIDTH, height: Int = HEIGHT, title: String = ""): JFrame = JFrame().apply {
         preferredSize = Dimension(width, height)
+        this.title = title
         setLocationRelativeTo(null)
         add(createChartPanel())
         pack()
-        defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         isVisible = true
     }
 

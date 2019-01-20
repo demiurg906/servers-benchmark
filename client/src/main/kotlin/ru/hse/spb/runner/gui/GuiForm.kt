@@ -42,7 +42,7 @@ class Gui {
     }
 
     private val backgroundThreadPool = Executors.newSingleThreadExecutor()
-    private val clientsThreadPool = Executors.newCachedThreadPool()
+    private var clientsThreadPool = Executors.newCachedThreadPool()
 
     private fun JFormattedTextField.initValue(value: Int) = this.apply { text = value.toString() }
     private fun JFormattedTextField.initValue(value: String) = this.apply { text = value }
@@ -59,16 +59,16 @@ class Gui {
     private val mStep = JFormattedTextField().initValue(10)
     private val mFields: Fields = mField to listOf(mStart, mEnd, mStep)
 
-    private val deltaField = JFormattedTextField().initValue(1)
+    private val deltaField = JFormattedTextField().initValue(1000)
     private val deltaStart = JFormattedTextField().initValue(0)
-    private val deltaEnd = JFormattedTextField().initValue(10)
-    private val deltaStep = JFormattedTextField().initValue(1)
+    private val deltaEnd = JFormattedTextField().initValue(2000)
+    private val deltaStep = JFormattedTextField().initValue(100)
     private val deltaFields: Fields = deltaField to listOf(deltaStart, deltaEnd, deltaStep)
 
-    private val xField = JFormattedTextField().initValue(5)
-    private val serverAddressField = JFormattedTextField().initValue("127.0.0.1")
-//    private val serverAddressField = JFormattedTextField().initValue("192.168.1.151")
-    private val statisticsFileField = JFormattedTextField().initValue(STATISTICS_FILE)
+    private val xField = JFormattedTextField().initValue(10)
+//    private val serverAddressField = JFormattedTextField().initValue("127.0.0.1")
+    private val serverAddressField = JFormattedTextField().initValue("192.168.1.151")
+    private val tasksCounterLabel = JLabel("0")
 
 
     private var serverType: ServerType = ServerType.DUMMY
@@ -238,28 +238,40 @@ class Gui {
         add(xField)
         add(JLabel("Server address"))
         add(serverAddressField)
-        add(JLabel("Output file"))
-        add(statisticsFileField)
+        add(JLabel("Current running tasks:"))
+        add(tasksCounterLabel)
+    }
+
+    private fun getCounter(): Int = tasksCounterLabel.text.toInt()
+    private fun increaseCounter() {
+        tasksCounterLabel.text = (getCounter() + 1).toString()
+    }
+    private fun decreaseCounter() {
+        tasksCounterLabel.text = (getCounter() - 1).toString()
     }
 
     private fun createRunButton(): JButton = JButton().apply {
-        text = "Run"
+        text = "Run current configuration"
         addActionListener {
-            isEnabled = false
+
             try {
                 val config = collectConfig()
                 ServerAddresses.serverAddress = getServerAddress()
-
+                increaseCounter()
                 backgroundThreadPool.submit {
                     try {
                         val summaryStatistic = collectStatistic(config, serverType, clientsThreadPool)
-                        val statisticsFile = "$STATISTICS_FOLDER/" + statisticsFileField.text.ifEmpty { STATISTICS_FILE } + ".csv"
+                        val fileName = "${serverType.prettyName}__${config.toFilename()}.csv"
+                        val statisticsFile = "$STATISTICS_FOLDER/$fileName"
                         summaryStatistic.saveToCsv(File(statisticsFile))
-                        isEnabled = true
-                        GraphForm(readCsv(statisticsFile)).createFrame()
+                        GraphForm(readCsv(statisticsFile)).createFrame(title = fileName)
                     } catch (e: Exception) {
                         createErrorFrame(this, "Something went wrong: ${e.message}")
+                        clientsThreadPool.shutdownNow()
+                        clientsThreadPool = Executors.newCachedThreadPool()
                         e.printStackTrace()
+                    } finally {
+                        decreaseCounter()
                     }
                 }
             } catch (e: FormatException) {
@@ -272,6 +284,7 @@ class Gui {
         val masterFrame = SwingUtilities.getWindowAncestor(button)
         val frame = this
         masterFrame.isEnabled = false
+        frame.title = "Error"
 
         add(JPanel().apply {
             layout = GridLayout(3, 1)
