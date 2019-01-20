@@ -41,7 +41,7 @@ class Gui {
         private val ipRegex = Regex("\\d\\d?\\d?.\\d\\d?\\d?.\\d\\d?\\d?.\\d\\d?\\d?")
     }
 
-    private val backgroundThreadPool = Executors.newSingleThreadExecutor()
+    private var backgroundThreadPool = Executors.newSingleThreadExecutor()
     private var clientsThreadPool = Executors.newCachedThreadPool()
 
     private fun JFormattedTextField.initValue(value: Int) = this.apply { text = value.toString() }
@@ -131,10 +131,16 @@ class Gui {
 
         setLocationRelativeTo(null)
         add(createConfigPanel())
-        add(createRunButton(), BorderLayout.SOUTH)
+        add(createButtonsPanel(), BorderLayout.SOUTH)
 
         pack()
         rangeType = RangeType.N_RANGE
+    }
+
+    private fun createButtonsPanel(): JPanel = JPanel().apply {
+        layout = GridLayout(1, 2)
+        add(createRunButton())
+        add(createCancelButton())
     }
 
     private fun createConfigPanel(): JPanel = JPanel().apply {
@@ -145,7 +151,6 @@ class Gui {
         add(createPanelWithConfigs("Choose M", mFields))
         add(createPanelWithConfigs("Choose Delta (ms)", deltaFields))
         add(createPanelWithX())
-
     }
 
     private fun createServerTypePanel(): JPanel = JPanel().apply {
@@ -253,15 +258,14 @@ class Gui {
     private fun createRunButton(): JButton = JButton().apply {
         text = "Run current configuration"
         addActionListener {
-
             try {
                 val config = collectConfig()
                 ServerAddresses.serverAddress = getServerAddress()
                 increaseCounter()
                 backgroundThreadPool.submit {
                     try {
-                        val summaryStatistic = collectStatistic(config, serverType, clientsThreadPool)
                         val fileName = "${serverType.prettyName}__${config.toFilename()}.csv"
+                        val summaryStatistic = collectStatistic(config, serverType, clientsThreadPool)
                         val statisticsFile = "$STATISTICS_FOLDER/$fileName"
                         summaryStatistic.saveToCsv(File(statisticsFile))
                         GraphForm(readCsv(statisticsFile)).createFrame(title = fileName)
@@ -277,6 +281,15 @@ class Gui {
             } catch (e: FormatException) {
                 createErrorFrame(this, e.message)
             }
+        }
+    }
+
+    private fun createCancelButton(): JButton = JButton().apply {
+        text = "Cancel all tasks"
+        addActionListener {
+            backgroundThreadPool.shutdownNow()
+            backgroundThreadPool = Executors.newSingleThreadExecutor()
+            tasksCounterLabel.text = "0"
         }
     }
 
